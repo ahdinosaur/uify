@@ -14,7 +14,9 @@ const args = cliArgs.concat(packageArgs)
 
 const config = {
   all: function (args) {
-    log.debug('all', args)
+    log.info({
+      env: process.env.NODE_ENV || 'undefined',
+    })
   },
   none: function (args) {
     log.debug('none', args)
