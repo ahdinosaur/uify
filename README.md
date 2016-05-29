@@ -20,9 +20,24 @@ here's a grab bag of documented tools to get you building apps again. :)
 
 - generate new projects with ease
 - uses the cutting-edge [`browserify`](https://github.com/substack/node-browserify) compiler
-- live reloads your app while you develop
+- exposes your entry file as `require('app')`
+- flattens configuration from many sources as `require('config')`
+- applies [`es2020`](https://github.com/yoshuawuyts/es2020), a transpiler for the better subset of ES6
+- provides source maps for improved debugging
+- live reloads your app whenever you change a file
+- applies compression when in minify mode
 
 ## usage
+
+```shell
+uify <subcommand> [options]
+  --version, -v         print version
+  --help, -h            print help
+```
+
+```js
+uify[subcommand](options, callback)
+```
 
 ### create
 
@@ -30,12 +45,18 @@ create new `uify` project.
 
 ```shell
 uify create my-super-cool-project
+? Version: (0.0.0) 1.0.0
+? Description: () Some description of your app
+? License: (Use arrow keys)
+> Apache-2.0
+  ISC
+  AGPL-3.0
+? App directory: (app)
+? Build directory: (build)
 ```
 
 ```js
-uify.create('my-super-cool-project', (err) => {
-  if (err) { throw err }
-})
+uify.create(options, callback)
 ```
 
 ### build
@@ -44,93 +65,109 @@ build project with [`browserify`](https://github.com/substack/node-browserify).
 
 if watch enabled, use [`watchify`](https://github.com/substack/watchify).
 
-in your code,
+in your JavaScript code,
 
 - `require('app')` will return the entry module.
 - `require('config')` will return your [config](https://github.com/ahdinosaur/simple-rc)
 
 ```shell
-uify bundle -e app -d build -w
+uify build [options]
+  --entry, -e           path to the entry source file for browserify (default: ".")
+  --output, -o          path to the output directory where files are built to (default: "build")
+  --watch, -w           watch source tree and rebuild using watchify (default: false)
+  --minify, -m          compress bundle using uglifyify, exorcist, and bundle-collapser (default: false)
+  --plugin, -p          name or path to any additional browserify plugin(s) (default: [])
 ```
 
 ```js
-uify.bundle({
-  entry: 'app',
-  destination: 'build'
-}, (err, stats) => {
-  if (err) { throw err }
-  console.log('time', stats.time)
-  console.log('bytes', stats.bytes)
-})
+uify.build(options, callback)
 ```
 
-#### options
+`build` accepts the following options:
 
-#### source [s]
-
-default: resolved entry file.
-
-#### destination [d]
-
-default: directory of resolved entry file.
-
-#### watch [w]
-
-default: `false`
-
-#### minify [m]
-
-default: `false`
+- `entry` (`e`): entry source file that [browserify](https://github.com/substack/node-browserify) uses to recursively walk `require`'d modules, resulting in a source tree. (default: resolved entry file of current working directory.)
+- `output` (`o`): output directory where files are built to. (default: directory of entry source file.)
+- `watch` (`w`): watch source tree and rebuild using [`watchify`](https://github.com/substack/watchify). (default: `false`)
+- `minify` (`m`): compress bundle using [`uglifyify`](https://github.com/hughsk/uglifyify), [exorcist](https://github.com/thlorenz/exorcist), and [bundle-collapser](https://github.com/substack/bundle-collapser). (default: `false`)
 
 ### callback(err, stats)
 
-`stats` is an object with the following keys:
+`callback(err)` is called if bundle process fails.
+
+`callback(null, stats)` is called on build (or re-build) with a `stats` object:
 
 - `time`: milliseconds to bundle
 - `bytes`: bytes in bundle
 
 ### serve
 
-serve static assets with [`ecstatic`](https://github.com/jfhbrook/node-ecstatic).
+serve static assets with [`serve-static`](https://github.com/expressjs/serve-static).
 
-if watch enabled, use [`ecstatic-lr`](https://github.com/ahdinosaur/ecstatic-lr) and [`watch-lr`](https://github.com/ahdinosaur/watch-lr).
+`serve` accepts the following options:
+
+- `directory` (`d`): directory to serve
+- `watch` (`w`): inject livereload script into html with [`inject-lr-script`](https://github.com/mattdesl/inject-lr-script)
+- `minify` (`m`): compress assets using [`compression`](https://github.com/expressjs/compression)
 
 ```shell
-uify serve -w
+uify serve
+  --directory, -d       directory to serve static assets (default: "build")
+  --port, -p            port of http server (default: 5000)
+  --watch, -w           inject LiveReload script into html files (default: false)
+  --minify, -m          compress assets with gzip (default: false)
 ```
 
 ```js
-uify.serve({
-  watch: true
-}, function (err, server) {
-  if (err) { throw err }
-  // ...
-})
+uify.serve(options, callback)
 ```
 
-server returned is `http` server.
+`callback(err)` is called if bundle process fails.
+
+`callback(null, server)` is called with [`http.Server`](https://nodejs.org/api/http.html#http_class_http_server) instance [once server is listening](https://nodejs.org/api/net.html#net_event_listening)
+
+### live
+
+see [`watch-lr`](https://github.com/ahdinosaur/watch-lr) docs
 
 ### start
 
-bundle javascript and serve assets.
+combination of `build -w`, `serve -w`, and `live`.
 
 ```shell
-uify deploy -s 
+uify start [options]
 ```
 
 ```js
-uify.deploy({}, function (err, server) {
-  if (err) { throw err }
-  // ...
-})
+uify.start(options, callback)
+```
+
+### push
+
+push app to GitHub pages
+
+```shell
+uify push
+```
+
+```js
+uify.push(options, callback)
 ```
 
 ### deploy
 
-deploy app 
+combination of `build -m` and `push`.
+
+```shell
+uify deploy
+```
+
+```js
+uify.deploy(options, callback)
+```
 
 ## inspiration
 
+- [slush-pages](https://github.com/ahdinosaur/slush-pages)
 - [bundleify](https://github.com/bendrucker/bundleify)
 - [bankai](https://github.com/yoshuawuyts/bankai)
 - [browserify for webpack users](https://gist.github.com/substack/68f8d502be42d5cd4942)

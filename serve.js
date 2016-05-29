@@ -3,9 +3,13 @@ const Stack = require('stacked')
 const serveStatic = require('serve-static')
 const pushState = require('connect-pushstate')
 const liveReload = require('inject-lr-script')
+const Watch = require('watch-lr')
 const Log = require('pino-http')
 
+const log = require('./log').child({ name: 'uify/serve'})
+
 module.exports = serve
+module.exports.log = log
 
 function serve (options, callback) {
   const stack = Stack()

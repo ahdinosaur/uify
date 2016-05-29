@@ -1,34 +1,37 @@
 'use strict'
 
 const assert = require('assert')
+const fs = require('fs')
 const extend = require('xtend')
 const Path = require('path')
-const pipe = require('value-pipe')
 const browserify = require('browserify')
 const watchify = require('watchify')
 const envify = require('envify')
 const uglifyify = require('uglifyify')
 const collapser = require('bundle-collapser/plugin')
 const exorcist = require('exorcist')
-const fs = require('fs')
 const Stream = require('readable-stream')
 
-module.exports = bundle
+const log = require('./log').child({ name: 'uify/serve'})
+
+module.exports = build
+module.exports.log = log
 
 const defaults = {
   basedir: process.cwd(),
   filename: 'bundle.js',
   plugins: [],
-  watch: false
+  watch: false,
+  minify: false
 }
 
 const config = Path.join(__dirname, './config.js')
 
-function bundle (options, callback) {
+function build (options, callback) {
   assert.equal(typeof options, 'object', 'options are required')
   assert.equal(typeof callback, 'function', 'callback is required')
-  assert.equal(typeof options.source, 'string', 'source is required')
-  assert.equal(typeof options.destination, 'string', 'destination is required')
+  assert.equal(typeof options.entry, 'string', 'entry is required')
+  assert.equal(typeof options.output, 'string', 'output is required')
 
   options = extend(defaults, options)
   const entry = Path.resolve(options.basedir, options.entry)
@@ -39,8 +42,8 @@ function bundle (options, callback) {
     { debug: true },
     options.watch ? watchify.args : null
   ))
-  .add(source)
-  .require(source, { expose: 'app' })
+  .add(entry)
+  .require(entry, { expose: 'app' })
   .require(config, { expose: 'config' })
   .plugin(customize, options)
   .transform(envify)
@@ -68,7 +71,7 @@ function bundle (options, callback) {
     bundler
     .bundle()
     .on('error', error)
-    .pipe(pipe(Exorcise, compress)(options)())
+    .pipe(compress(Exorcise(options))())
     .pipe(WriteStream(options))
     .on('finish', done)
   }
@@ -95,7 +98,7 @@ function Compressor (options) {
 function Exorcise (options) {
   return function exorcise () {
     return exorcist(
-      Path.resolve(options.destination, options.filename + '.map'), // destination
+      Path.resolve(options.output, options.filename + '.map'), // output
       null, // uri
       null, // root
       options.basedir // base
@@ -104,7 +107,7 @@ function Exorcise (options) {
 }
 
 function WriteStream (options) {
-  return fs.createWriteStream(Path.resolve(options.destination, options.filename))
+  return fs.createWriteStream(Path.resolve(options.output, options.filename))
 }
 
 function noop () {}
