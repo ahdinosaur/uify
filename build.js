@@ -12,7 +12,7 @@ const collapser = require('bundle-collapser/plugin')
 const exorcist = require('exorcist')
 const Stream = require('readable-stream')
 
-const log = require('./log').child({ name: 'uify/serve'})
+const log = require('./log').child({ name: 'uify/build'})
 
 module.exports = build
 module.exports.log = log

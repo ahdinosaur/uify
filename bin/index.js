@@ -1,6 +1,7 @@
 const subcommand = require('subcommand')
 const cliopts = require('cliclopts')
-const maximist = require('maximist')
+const Child = require('superchild')
+const dargs = require('dargs')
 const resolve = require('resolve')
 const pkgConf = require('pkg-conf')
 const fs = require('fs')
@@ -8,13 +9,7 @@ const Path = require('path')
 
 const log = require('../log')
 
-const packageOpts = getPackageOpts()
-const cwd = getCwd(packageOpts)
-const packageArgs = maximist(packageOpts)
-const cliArgs = process.argv.slice(2)
-const args = cliArgs.concat(packageArgs)
-
-module.exports.cwd = cwd
+module.exports.run = run
 
 const config = {
   root: {
@@ -52,25 +47,54 @@ const config = {
     help: 'base directory from which the relative paths are resolved'
   }],
   commands: [
+    require('./start'),
+    //require('./deploy'),
     require('./build'),
+    //require('./push'),
     require('./serve'),
     require('./live'),
-    //require('./start'),
-    //require('./push'),
-    //require('./deploy'),
   ]
 }
 
 const match = subcommand(config)
 
-match(args)
+if (!module.parent) {
+  const packageOpts = pkgConf.sync('uify')
+  const packageArgs = dargs(packageOpts)
+  const cliArgs = process.argv.slice(2)
+  const args = cliArgs.concat(packageArgs)
 
-function getPackageOpts () {
-  return pkgConf.sync('uify', {
-    cwd: process.cwd()
-  })
+  match(args)
 }
 
-function getCwd (pkgOptions) {
-  return Path.dirname(pkgConf.filepath(pkgOptions))
+function run (scripts) {
+  return Object.keys(scripts)
+  .map(function (name) {
+    const args = dargs(scripts[name])
+    const commandLine = ['node', __dirname, name].concat(args).join(' ')
+    const child = Child(commandLine)
+
+    log.info({
+      type: 'spawn',
+      command: name,
+      args: args,
+      childPid: child.pid,
+    })
+
+    child
+    .on('stdout', function (data) {
+      process.stdout.write(data)
+    })
+    .on('stderr_data', function (data) {
+      process.stderr.write(data)
+    })
+    .on('exit', function (code, signal) {
+      log.error({
+        msg: 'child at pid '+child.pid+' exited with '+code+' '+signal,
+      })
+      process.exit(code, signal)
+    })
+
+    return child
+  })
 }

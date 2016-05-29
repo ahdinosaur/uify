@@ -1,3 +1,4 @@
+const Url = require('url')
 const http = require('http')
 const Stack = require('stacked')
 const serveStatic = require('serve-static')
@@ -5,6 +6,7 @@ const pushState = require('connect-pushstate')
 const liveReload = require('inject-lr-script')
 const Watch = require('watch-lr')
 const Log = require('pino-http')
+const indexHtml = require('simple-html-index')
 
 const log = require('./log').child({ name: 'uify/serve'})
 
@@ -22,6 +24,16 @@ function serve (options, callback) {
     stack.use(liveReload())
   }
 
+  stack.use(function (req, res) {
+    const url = Url.parse(req.url)
+    if (url.pathname === '/') {
+      indexHtml({
+        title: 'uify',
+        entry: 'bundle.js'
+      }).pipe(res)
+    }
+  })
+
   // TODO server-side rendering
   
   // if not server-side rendering,
@@ -32,7 +44,7 @@ function serve (options, callback) {
     }))
   }
 
-  stack.use(serveStatic(options.destination, {}))
+  stack.use(serveStatic(options.directory, {}))
 
   const server = http.createServer(stack)
 

@@ -38,15 +38,16 @@ module.exports = {
       args.plugin = [args.plugin]
     }
 
-    build(opts, function (err, stats) {
+    build(args, function (err, stats) {
+      // TODO receive fs stat objects
+      // for when we want to build multiple files
       if (err) {
         build.log.error(err)
       } else {
-        build.log.info(
-          stats.bytes + " bytes written to " +
-          opts.destination + " (" +
-          (stats.time / 1000).toFixed(2) + " seconds)"
-        )
+        build.log.info({
+          msg: stats.bytes + " bytes written to " + args.output
+            + " (" + (stats.time / 1000).toFixed(2) + " seconds)",
+        })
       }
     })
   }
