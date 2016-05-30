@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "an opinionated stack for browserify apps",
   "main": "index.js",
+  "bin": "node ./bin/index.js",
   "scripts": {
     "start": "budo example:bundle.js -d example --live -- -d",
     "deploy": "npm-run-all -s build push",
