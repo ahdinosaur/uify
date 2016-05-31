@@ -29,7 +29,7 @@ const config = {
         const pkgPath = Path.join(__dirname, '../package.json')
         const pkg = fs.readFileSync(pkgPath, 'utf8')
         console.log(pkg.version)
-      } else if (args.help) {
+      } else {
         console.log('Usage: uify <subcommand> [options]')
         console.log('  uify')
         cliopts(config.root.options).print()
