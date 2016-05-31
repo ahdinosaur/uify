@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const subcommand = require('subcommand')
 const cliopts = require('cliclopts')
 const Child = require('superchild')
