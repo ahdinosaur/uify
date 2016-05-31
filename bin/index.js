@@ -36,6 +36,10 @@ const config = {
     }
   },
   all: function allCommands (args) {
+    // use setBlocking because of weirdness in node 6
+    // where stdout might be cut off due to async
+    // that doesn't play well with process.exit()
+    setBlocking(true)
     var commandName = args._[0]
     var command = config.commands.find(function (command) {
       return command.name === commandName
@@ -49,12 +53,10 @@ const config = {
         usageAll()
       }
     } else {
+      // we want non-blocking stdout
+      setBlocking(false)
       return
     }
-    // use setBlocking because of weirdness in node 6
-    // where stdout might be cut off due to async
-    // that doesn't play well with process.exit()
-    setBlocking(true)
     process.exit(0)
   },
   defaults: [{
