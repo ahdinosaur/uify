@@ -6,12 +6,16 @@ const Child = require('superchild')
 const dargs = require('dargs')
 const resolve = require('resolve')
 const pkgConf = require('pkg-conf')
+const setBlocking = require('set-blocking')
 const fs = require('fs')
 const Path = require('path')
 
 const log = require('../log')
 
 module.exports.run = run
+
+const pkgPath = Path.join(__dirname, '../package.json')
+const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
 
 const config = {
   root: {
@@ -26,20 +30,27 @@ const config = {
       abbr: 'h',
       help: 'print help'
     }],
-    command: function noCommand (args) {
-      if (args.version) {
-        const pkgPath = Path.join(__dirname, '../package.json')
-        const pkg = fs.readFileSync(pkgPath, 'utf8')
-        console.log(pkg.version)
+  },
+  none: function noCommand (args) {
+    if (!args.version) {
+      usageAll()
+    }
+  },
+  all: function allCommands (args) {
+    var commandName = args._[0]
+    var command = config.commands.find(function (command) {
+      return command.name === commandName
+    })
+    if (args.version) {
+      console.log(pkg.version)
+    } else if (args.help) {
+      setBlocking(true)
+      if (command) {
+        usageOne(command)
       } else {
-        console.log('Usage: uify <subcommand> [options]')
-        console.log('  uify')
-        cliopts(config.root.options).print()
-        config.commands.forEach(function (sub) {
-          console.log('  uify ' + sub.name)
-          cliopts(sub.options).print()
-        })
+        usageAll()
       }
+      process.exit(0)
     }
   },
   defaults: [{
@@ -100,3 +111,20 @@ function run (scripts) {
     return child
   })
 }
+
+function usageAll () {
+  console.log('Usage: uify <subcommand> [options]')
+  console.log('  uify')
+  cliopts(config.root.options).print()
+  config.commands.forEach(function (sub) {
+    console.log('  uify ' + sub.name)
+    cliopts(sub.options).print()
+  })
+}
+
+function usageOne (command) {
+  console.log('Usage: uify '+command.name+' [options]')
+  console.log('  uify '+command.name)
+  cliopts(command.options).print()
+}
+
