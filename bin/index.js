@@ -43,14 +43,19 @@ const config = {
     if (args.version) {
       console.log(pkg.version)
     } else if (args.help) {
-      setBlocking(true)
       if (command) {
         usageOne(command)
       } else {
         usageAll()
       }
-      process.exit(0)
+    } else {
+      return
     }
+    // use setBlocking because of weirdness in node 6
+    // where stdout might be cut off due to async
+    // that doesn't play well with process.exit()
+    setBlocking(true)
+    process.exit(0)
   },
   defaults: [{
     name: 'basedir',
