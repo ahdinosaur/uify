@@ -41,7 +41,7 @@ uify[subcommand](options, callback)
 
 ### create
 
-create new `uify` project.
+TODO create new `uify` project.
 
 ```shell
 uify create my-super-cool-project
@@ -58,6 +58,39 @@ uify create my-super-cool-project
 ```js
 uify.create(options, callback)
 ```
+
+### start
+
+[live](#live) [development](#build) [server](#serve) for your front-end app.
+
+in your JavaScript code,
+
+- `require('app')` will return the entry module.
+- `require('config')` will return your [config](https://github.com/ahdinosaur/simple-rc)
+
+```shell
+uify start [options]
+  --entry, -e           path to the entry source file for browserify (default: ".")
+  --output, -o          path to the output directory where files are built to (default: "build")
+  --plugin, -p          name or path to any additional browserify plugin(s) (default: [])
+```
+
+```js
+uify.start(options, callback)
+```
+
+### deploy
+
+TODO [build](#build) and [`git push`](#push) to a remote server, like Github pages.
+
+```shell
+uify deploy
+```
+
+```js
+uify.deploy(options, callback)
+```
+
 
 ### build
 
@@ -89,8 +122,6 @@ uify.build(options, callback)
 - `output` (`o`): output directory where files are built to. (default: directory of entry source file.)
 - `watch` (`w`): watch source tree and rebuild using [`watchify`](https://github.com/substack/watchify). (default: `false`)
 - `minify` (`m`): compress bundle using [`uglifyify`](https://github.com/hughsk/uglifyify), [exorcist](https://github.com/thlorenz/exorcist), and [bundle-collapser](https://github.com/substack/bundle-collapser). (default: `false`)
-
-### callback(err, stats)
 
 `callback(err)` is called if bundle process fails.
 
@@ -129,21 +160,9 @@ uify.serve(options, callback)
 
 see [`watch-lr`](https://github.com/ahdinosaur/watch-lr) docs
 
-### start
-
-combination of `build -w`, `serve -w`, and `live`.
-
-```shell
-uify start [options]
-```
-
-```js
-uify.start(options, callback)
-```
-
 ### push
 
-push app to GitHub pages
+TODO `git push` to a remote server (like GitHub pages).
 
 ```shell
 uify push
@@ -151,18 +170,6 @@ uify push
 
 ```js
 uify.push(options, callback)
-```
-
-### deploy
-
-combination of `build -m` and `push`.
-
-```shell
-uify deploy
-```
-
-```js
-uify.deploy(options, callback)
 ```
 
 ## inspiration
