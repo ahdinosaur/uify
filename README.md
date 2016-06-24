@@ -8,6 +8,8 @@ the end of javascript fatigue: an opinionated set of tools for front-end apps
 # npm install -g ahdinosaur/uify
 ```
 
+![tranquil human](https://upload.wikimedia.org/wikipedia/commons/c/ca/Toulmouche-auguste_tranquil-afternoon.jpg)
+
 ## what
 
 you want to build a front-end app, but which tool should you use?
