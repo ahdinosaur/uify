@@ -8,6 +8,7 @@ const pkgConf = require('pkg-conf')
 const setBlocking = require('set-blocking')
 const fs = require('fs')
 const Path = require('path')
+const parallel = require('run-parallel')
 
 const log = require('../log')
 
@@ -87,7 +88,9 @@ if (!module.parent) {
 }
 
 function run (scripts) {
-  return Object.keys(scripts)
+  var exiting = false
+
+  const children = Object.keys(scripts)
   .map(function (name) {
     const args = dargs(scripts[name])
     const commandLine = ['node', __dirname, name].concat(args).join(' ')
@@ -111,11 +114,39 @@ function run (scripts) {
       log.error({
         msg: 'child at pid '+child.pid+' exited with '+code+' '+signal,
       })
-      process.exit(code, signal)
+      if (!exiting) exit(code, signal)
     })
 
     return child
   })
+
+  process.once('SIGTERM', function () {
+    exit(0, 'SIGTERM')
+  })
+
+  process.once('SIGINT', function () {
+    exit(0, 'SIGINT')
+  })
+
+  return children
+
+  function exit (code, signal) {
+    exiting = true
+    parallel(
+      children.map(function (child) {
+        return function (cb) {
+          child.close(cb)
+        }
+      }),
+      function (err) {
+        if (err) console.error(err)
+        log.error({
+          msg: 'parent at pid '+process.pid+' exited with '+code+' '+signal,
+        })
+        process.exit(code, signal)
+      }
+    )
+  }
 }
 
 function usageAll () {
