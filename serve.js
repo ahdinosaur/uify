@@ -24,6 +24,8 @@ function serve (options, callback) {
     stack.use(liveReload())
   }
 
+  stack.use(serveStatic(options.directory, {}))
+
   stack.use(function (req, res) {
     const url = Url.parse(req.url)
     if (url.pathname === '/') {
@@ -43,8 +45,6 @@ function serve (options, callback) {
       root: '/' // TODO option
     }))
   }
-
-  stack.use(serveStatic(options.directory, {}))
 
   const server = http.createServer(stack)
 
