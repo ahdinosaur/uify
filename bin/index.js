@@ -67,6 +67,7 @@ const config = {
     help: 'base directory from which the relative paths are resolved'
   }],
   commands: [
+    require('./create'),
     require('./start'),
     //require('./deploy'),
     require('./build'),
