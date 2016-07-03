@@ -72,8 +72,6 @@ const config = {
     //require('./deploy'),
     require('./build'),
     //require('./push'),
-    require('./serve'),
-    require('./live'),
   ]
 }
 

@@ -1,6 +1,4 @@
-const Child = require('superchild')
-
-const run = require('./').run
+const start = require('../start')
 
 module.exports = {
   name: 'start',
@@ -10,32 +8,15 @@ module.exports = {
     default: '.',
     help: 'path to the entry source file for browserify'
   }, {
-    name: 'output',
+    name: 'port',
     abbr: 'o',
-    alias: ['directory'],
-    default: 'build',
-    help: 'path to the output directory where files are built to'
+    default: process.env.PORT || 5000,
+    help: 'port to serve http with budo'
   }, {
     name: 'plugin',
     abbr: 'p',
     default: [],
     help: 'name or path to any additional browserify plugin(s)'
   }],
-  command: function (args) {
-    const children = run({
-      build: {
-        entry: args.entry,
-        output: args.output,
-        plugin: args.plugin,
-        watch: true
-      },
-      serve: {
-        directory: args.output,
-        watch: true
-      },
-      live: {
-        files: args.output+"/**/*.{js,html,css}"
-      }
-    })
-  }
+  command: start
 }
