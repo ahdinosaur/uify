@@ -12,15 +12,9 @@ module.exports = {
   }, {
     name: 'output',
     abbr: 'o',
-    alias: ['directory'],
+    alias: ['destination'],
     default: 'build',
     help: 'path to the output directory where files are built to'
-  }, {
-    name: 'watch',
-    abbr: 'w',
-    boolean: true,
-    default: false,
-    help: 'watch source tree and rebuild using watchify'
   }, {
     name: 'minify',
     abbr: 'm',
